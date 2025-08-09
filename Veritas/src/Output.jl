@@ -6,7 +6,7 @@ Print an error without cancelling the entire program.
 
 Used for things like non-existant input files, bad flags, etc.
 """
-function error(msg)
+function error(msg::String)
     println("veritas: \033[1;31merror:\033[0m $msg")
 end
 
@@ -16,9 +16,9 @@ Print an error and exit the application early.
 
 Used for instances were no further progression is possible.
 """
-function fatal_error(msg)
+function fatal_error(msg::String, code::Int=1)
     println("veritas: \033[1;31merror:\033[0m $msg")
-    exit()
+    exit(code)
 end
 
 
