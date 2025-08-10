@@ -1,9 +1,6 @@
-module Output
-
 
 """
 Print an error without cancelling the entire program.
-
 Used for things like non-existant input files, bad flags, etc.
 """
 function error(msg::String)
@@ -13,7 +10,6 @@ end
 
 """
 Print an error and exit the application early.
-
 Used for instances were no further progression is possible.
 """
 function fatal_error(msg::String, code::Int=1)
@@ -36,6 +32,3 @@ function put_output(ctx)
     end
 
 end
-
-
-end # module Output

@@ -2,13 +2,22 @@ module Veritas
 
 
 include("Output.jl")
-using .Output
 
-include("Parser.jl")
-using .Parser
 
-include("Context.jl")
-using .Context
+
+"""
+Contains information on the current running program, such as
+the provided files, flags, and other information needed globally.
+"""
+mutable struct ProgramContext
+    input_files::Vector{String}         # A list of input file names
+    input_file_asts::Vector{Expr}       # The AST associated with each input file
+    smt_lib_encodings::Vector{String}   # The SMT-LIB encodings created for each file
+    print_smt::Bool                     # Should the SMT-LIB be output to a file after encoding
+    ProgramContext() = new(String[], Expr[], String[], false)
+end # struct ProgramContext
+
+
 
 
 """
@@ -27,7 +36,7 @@ NOTE: There are currently no flags, so all arguments are treated as files.
 Returns a ProgramContext.
 """
 function parse_arguments(args) 
-    ctx = Context.ProgramContext()
+    ctx = ProgramContext()
 
     for arg in args
         if arg == "--print"
@@ -38,6 +47,32 @@ function parse_arguments(args)
     end
 
     return ctx
+end
+
+
+
+"""
+Parse the provided files, recording their ASTs. These recorded binary
+trees will later be used to generate SMT-LIB, the language used in
+static verifiers like Veritas.
+
+This function will also check that the provided files exist. If not,
+it will throw a fatal error. 
+
+Note: Should this function throw a fatal error, or continue without that file?
+"""
+function parse_files(ctx)
+    for file in ctx.input_files
+        try
+            contents = read(file, String)
+            ast = Meta.parse(contents)
+            push!(ctx.input_file_asts, ast)
+        catch e
+            fatal_error(string(e))
+        end
+    end
+    
+    return ctx;
 end
 
 
@@ -55,13 +90,17 @@ This function performs the following steps:
 
 """
 function main(args)
-    
+
     # Take in arguments
-    parse_arguments(args)
+    ctx::ProgramContext = parse_arguments(args)
+
+    # Generate ASTs
+    ctx = parse_files(ctx)
+
 
 end # function main
 
 
-main(ARGS) # call the main function when not wrapped into a binary.
+main(ARGS)
 
 end # module Veritas

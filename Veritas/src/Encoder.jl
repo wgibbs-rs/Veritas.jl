@@ -1,7 +1,5 @@
 module Encoder
 
-include("Context.jl")
-using .Context
 
 # Returns the header of the SMT-LIB encoding.
 function smt2_header()
