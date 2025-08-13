@@ -17,4 +17,11 @@ function smt2_footer()
 """
 end #function smt2_footer
 
+
+
+function encode(text, ctx)
+    return ""
+end
+
+
 end # module Encoder
