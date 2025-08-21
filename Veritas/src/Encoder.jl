@@ -17,11 +17,18 @@ function smt2_footer()
 """
 end #function smt2_footer
 
-
-
-function encode(text, ctx)
+function encode(ast, ctx)
+    while true
+        break
+    end
     return ""
 end
 
+function clean(ast, ctx)
+    while true
+        break
+    end
+    return ast
+end
 
 end # module Encoder

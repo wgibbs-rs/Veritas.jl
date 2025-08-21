@@ -12,11 +12,19 @@ the provided files, flags, and other information needed globally.
 """
 mutable struct ProgramContext
     input_files::Vector{String}                     # A list of input file names
-    input_files_extensionless::Vector{String}       # A list of input file names without the .jl extention.
+    input_files_extensionless::Vector{String}       # A list of input file names without the .jl extention
     input_file_asts::Vector{Expr}                   # The AST associated with each input file
     smt_lib_encodings::Vector{String}               # The SMT-LIB encodings created for each file
     print_smt::Bool                                 # Should the SMT-LIB be output to a file after encoding
-    ProgramContext() = new(String[], String[], Expr[], String[], false)
+    print_ast::Bool                                 # Should Veritas print the Julia code to the terminal
+    ProgramContext() = new(
+        String[], 
+        String[], 
+        Expr[], 
+        String[], 
+        false, 
+        false
+    )
 end # struct ProgramContext
 
 
@@ -67,14 +75,13 @@ Note: Should this function throw a fatal error, or continue without that file?
 function parse_files(ctx)
     for file in ctx.input_files
         try
-            contents = read(file, String)
+            contents = "begin\n" * read(file, String) * "\nend"
             ast = Meta.parse(contents)
             push!(ctx.input_file_asts, ast)
         catch e
             fatal_error(string(e))
         end
     end
-
     return ctx;
 end
 
@@ -100,10 +107,16 @@ function main(args)
     # Generate ASTs
     ctx = parse_files(ctx)
 
+    # Prepare each ast for encoding
+    for i in eachindex(ctx.input_file_asts)
+        ctx.input_file_asts[i] = Encoder.clean(ctx.input_file_asts[i], ctx)
+    end
+
     # encode each file to SMT-LIB
     for ast in ctx.input_file_asts
-        encoding = Encoder.encode(ast, ctx);
+        encoding = Encoder.encode(ast, ctx)
         push!(ctx.smt_lib_encodings, encoding)
+        print_ast(ast)
     end
 
     # If dumping the SMT-LIB encodings, we'll do that here, then exit.
