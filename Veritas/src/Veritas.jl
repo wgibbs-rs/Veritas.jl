@@ -1,9 +1,35 @@
+"""
+ZLib License
+
+Copyright (c) 2025 William Gibbs
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source distribution.
+"""
 module Veritas
 
+include("Cleaner.jl")
+using .Cleaner
 
 include("Output.jl")
+using .Output
 
-include("Encoder.jl")
+include("encoding/Encoder.jl")
 using .Encoder
 
 """
@@ -11,14 +37,12 @@ Contains information on the current running program, such as
 the provided files, flags, and other information needed globally.
 """
 mutable struct ProgramContext
-    input_files::Vector{String}                     # A list of input file names
-    input_files_extensionless::Vector{String}       # A list of input file names without the .jl extention
+    input_file_names::Vector{String}                # A list of input file names
     input_file_asts::Vector{Expr}                   # The AST associated with each input file
     smt_lib_encodings::Vector{String}               # The SMT-LIB encodings created for each file
-    print_smt::Bool                                 # Should the SMT-LIB be output to a file after encoding
-    print_ast::Bool                                 # Should Veritas print the Julia code to the terminal
+    dump_smt::Bool                                  # Should the SMT-LIB be output to a file after encoding
+    dump_ast::Bool                                  # Should Veritas print the Julia code to the terminal
     ProgramContext() = new(
-        String[], 
         String[], 
         Expr[], 
         String[], 
@@ -26,9 +50,6 @@ mutable struct ProgramContext
         false
     )
 end # struct ProgramContext
-
-
-
 
 """
 Parse arguments provided in the command line.
@@ -47,33 +68,29 @@ Returns a ProgramContext.
 """
 function parse_arguments(args) 
     ctx = ProgramContext()
-
     for arg in args
-        if arg == "--print"
-            ctx.print_smt = true;
-        else 
-            push!(ctx.input_files_extensionless, splitext(arg)[1])
-            push!(ctx.input_files, arg)
+        if arg == "-h" || arg == "--help"
+            Output.help()
+        elseif arg == "-v" || arg == "--version"
+            Output.version()
+        elseif arg == "-dump-ast"
+            ctx.dump_ast = true;
+        elseif arg == "-dump-smt"
+            ctx.dump_smt = true;
+        else
+            push!(ctx.input_file_names, arg)
         end
     end
-
     return ctx
 end
-
-
 
 """
 Parse the provided files, recording their ASTs. These recorded binary
 trees will later be used to generate SMT-LIB, the language used in
 static verifiers like Veritas.
-
-This function will also check that the provided files exist. If not,
-it will throw a fatal error. 
-
-Note: Should this function throw a fatal error, or continue without that file?
 """
 function parse_files(ctx)
-    for file in ctx.input_files
+    for file in ctx.input_file_names
         try
             contents = "begin\n" * read(file, String) * "\nend"
             ast = Meta.parse(contents)
@@ -85,8 +102,6 @@ function parse_files(ctx)
     return ctx;
 end
 
-
-
 """
 Main entry point for Veritas.jl.
 
@@ -97,10 +112,8 @@ This function performs the following steps:
 3. Converts the generated AST's into SMT-LiB texts.
 4. Passes the SMT-LiB texts to the analysis backend: Z3.
 5. Returns or prints the analysis results.
-
 """
 function main(args)
-
     # Take in arguments
     ctx::ProgramContext = parse_arguments(args)
 
@@ -109,21 +122,22 @@ function main(args)
 
     # Prepare each ast for encoding
     for i in eachindex(ctx.input_file_asts)
-        ctx.input_file_asts[i] = Encoder.clean(ctx.input_file_asts[i], ctx)
+        ctx.input_file_asts[i] = Cleaner.clean(ctx.input_file_asts[i], ctx)
     end
 
     # encode each file to SMT-LIB
     for ast in ctx.input_file_asts
         encoding = Encoder.encode(ast, ctx)
         push!(ctx.smt_lib_encodings, encoding)
-        print_ast(ast)
+        if ctx.dump_ast
+            Output.print_ast(ast)
+        end
     end
 
     # If dumping the SMT-LIB encodings, we'll do that here, then exit.
-    if ctx.print_smt
-        # create files and dump
+    if ctx.dump_smt
         for i in 1:length(ctx.input_files)
-            println(ctx.input_files_extensionless[i] * ".smt2")
+            # create files and dump
         end
         exit()
     end
@@ -133,7 +147,6 @@ function main(args)
     # Print the resulting outputs from Z3, cleanup, etc.
 
 end # function main
-
 
 main(ARGS)
 
