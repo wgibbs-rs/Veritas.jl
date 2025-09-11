@@ -21,19 +21,30 @@ freely, subject to the following restrictions:
 
 3. This notice may not be removed or altered from any source distribution.
 """
-module Encoder
+module SMT
 
-include("SMT.jl")
-using .SMT
+export smt2_header, smt2_footer, create_comment
 
-export encode
-
-function encode(ast, ctx)
-    encoding = smt2_header() # Generate the start of our theorem.
-    while true
-        break
-    end
-    return encoding
+# Returns the header of the SMT-LIB encoding.
+function smt2_header()
+    return """
+(set-info :smt-lib-version 2.7)
+(set-info :source "Veritas.jl, https://www.github.com/wgibbs-rs/veritas.jl")
+(set-logic QF_LIA)
+"""
 end
 
-end # module Encoder
+# Returns the end-code of the SMT-LIB encoding.
+function smt2_footer()
+    return """
+(check-sat)
+(get-model)
+"""
+end
+
+# Return a comment usable by SMT-LIB
+function create_comment(text)
+    return ";; $text"
+end
+
+end # module SMT

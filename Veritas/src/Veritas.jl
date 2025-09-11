@@ -37,11 +37,11 @@ Contains information on the current running program, such as
 the provided files, flags, and other information needed globally.
 """
 mutable struct ProgramContext
-    input_file_names::Vector{String}                # A list of input file names
-    input_file_asts::Vector{Expr}                   # The AST associated with each input file
-    smt_lib_encodings::Vector{String}               # The SMT-LIB encodings created for each file
-    dump_smt::Bool                                  # Should the SMT-LIB be output to a file after encoding
-    dump_ast::Bool                                  # Should Veritas print the Julia code to the terminal
+    input_file_names::Vector{String}    # A list of input file names
+    input_file_asts::Vector{Expr}       # The AST associated with each input file
+    smt2_encodings::Vector{String}      # The SMT-LIB encodings created for each file
+    dump_smt::Bool                      # Should the SMT-LIB be output to a file after encoding
+    dump_ast::Bool                      # Should Veritas print the Julia code to the terminal
     ProgramContext() = new(
         String[], 
         Expr[], 
@@ -128,7 +128,7 @@ function main(args)
     # encode each file to SMT-LIB
     for ast in ctx.input_file_asts
         encoding = Encoder.encode(ast, ctx)
-        push!(ctx.smt_lib_encodings, encoding)
+        push!(ctx.smt2_encodings, encoding)
         if ctx.dump_ast
             Output.print_ast(ast)
         end
