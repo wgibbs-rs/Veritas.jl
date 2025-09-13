@@ -2,7 +2,7 @@
 
 # Asserts that for every input x and y,
 @pre y != 0
-@post result * y = x
+@post divide * y = x
 function divide(x, y)
     return x / y
 end

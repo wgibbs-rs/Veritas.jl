@@ -60,6 +60,7 @@ Options:
 Examples:
     julia Veritas.jl input.jl           Analyze an input file.
     """)
+    exit()
 end
 
 """
@@ -78,11 +79,9 @@ input.smt2
 This file will contain the smt2 encodings created by Veritas.
 """
 function put_output(ctx)
-
     for file in ctx.input_file_names
-        output_name = splitext(filename)[1]
+        output_name = splitext(filename)[1] * ".smt2"
     end
-
 end
 
 """

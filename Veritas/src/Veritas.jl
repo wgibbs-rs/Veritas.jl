@@ -23,14 +23,14 @@ freely, subject to the following restrictions:
 """
 module Veritas
 
-include("Cleaner.jl")
-using .Cleaner
+include("preprocess.jl")
+using .Preprocess
 
-include("Output.jl")
+include("output.jl")
 using .Output
 
-include("encoding/Encoder.jl")
-using .Encoder
+include("validation/analysis.jl")
+using .Analysis
 
 """
 Contains information on the current running program, such as
@@ -127,7 +127,7 @@ function main(args)
 
     # encode each file to SMT-LIB
     for ast in ctx.input_file_asts
-        encoding = Encoder.encode(ast, ctx)
+        model = Validation.create_model(ast, ctx)
         push!(ctx.smt2_encodings, encoding)
         if ctx.dump_ast
             Output.print_ast(ast)
