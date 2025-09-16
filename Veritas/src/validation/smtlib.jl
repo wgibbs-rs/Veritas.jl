@@ -45,5 +45,4 @@ function new_line(text)
 end
 export smt2_comment
 
-
 end # module SMTLIB
