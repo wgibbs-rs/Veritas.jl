@@ -21,12 +21,15 @@ freely, subject to the following restrictions:
 
 3. This notice may not be removed or altered from any source distribution.
 """
-module Analyze
+module Analyzer
 
 include("smtlib.jl")
 using .SMTLIB
 
-export encode
+const VariableType = (
+    :integer,
+    :type_undef # A special type used when a variable's type is unknown.
+)
 
 function create_model(ast, ctx)
     encoding = smt2_header() # Generate the start of our theorem.
@@ -35,5 +38,6 @@ function create_model(ast, ctx)
     end
     return encoding
 end
+export create_model
 
-end # module Validation
+end # module Analyzer

@@ -23,6 +23,20 @@ freely, subject to the following restrictions:
 """
 module SMTLIB
 
+using Z3
+
+function check_smt2(text::String)
+    ctx = Context()
+    asts = Z3.Libz3.Z3_parse_smtlib2_string(ctx.ctx, text, 0, C_NULL, C_NULL, 0, C_NULL, C_NULL)
+    solver = Solver(ctx)
+    for i in 1:Z3.Libz3.Z3_ast_vector_size(ctx.ctx, asts)
+        ast = Z3.Libz3.Z3_ast_vector_get(ctx.ctx, asts, i)
+        add(solver, ast)
+    end
+    return Z3.check(solver) == Z3.CheckResult(:sat)
+end
+export check_smt2
+
 # Returns the header of the SMT-LIB encoding.
 function smt2_header()
     return """\n
@@ -43,6 +57,6 @@ export smt2_footer
 function new_line(text)
     return "\n$text\n"
 end
-export smt2_comment
+export new_line
 
 end # module SMTLIB

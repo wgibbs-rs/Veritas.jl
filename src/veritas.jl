@@ -29,8 +29,8 @@ using .Preprocess
 include("output.jl")
 using .Output
 
-include("validation/analysis.jl")
-using .Analysis
+include("validation/analyzer.jl")
+using .Analyzer
 
 """
 Contains information on the current running program, such as
@@ -73,12 +73,16 @@ function parse_arguments(args)
             Output.help()
         elseif arg == "-v" || arg == "--version"
             Output.version()
-        elseif arg == "-dump-ast"
+        elseif arg == "--dump-ast"
             ctx.dump_ast = true;
-        elseif arg == "-dump-smt"
+        elseif arg == "--dump-smt"
             ctx.dump_smt = true;
         else
-            push!(ctx.input_file_names, arg)
+            if startswith(arg, "-")
+                fatal_error("option \"$arg\" is unknown.\n  use \"src/veritas.jl --help\" for a list of options.")
+            else
+                push!(ctx.input_file_names, arg)
+            end
         end
     end
     return ctx
@@ -122,13 +126,13 @@ function main(args)
 
     # Prepare each ast for encoding
     for i in eachindex(ctx.input_file_asts)
-        ctx.input_file_asts[i] = Cleaner.clean(ctx.input_file_asts[i], ctx)
+        ctx.input_file_asts[i] = clean(ctx.input_file_asts[i], ctx)
     end
 
     # encode each file to SMT-LIB
     for ast in ctx.input_file_asts
-        model = Validation.create_model(ast, ctx)
-        push!(ctx.smt2_encodings, encoding)
+        model = create_model(ast, ctx)
+        push!(ctx.smt2_encodings, model)
         if ctx.dump_ast
             Output.print_ast(ast)
         end

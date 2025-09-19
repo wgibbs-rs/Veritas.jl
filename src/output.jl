@@ -23,23 +23,13 @@ freely, subject to the following restrictions:
 """
 module Output
 
-"""
-Print an error without cancelling the entire program.
-Used for things like non-existant input files, bad flags, etc.
-"""
-function error(msg::String)
-    println("veritas: \033[1;31merror:\033[0m $msg")
-end
-
-"""
-Print an error and exit the application early.
-Used for instances were no further progression is possible.
-"""
+# Print an error message and exit the application early.
 function fatal_error(msg::String, code::Int=1)
     println("veritas: \033[1;31merror:\033[0m $msg")
     println("veritas: \033[1;31merror:\033[0m analysis failed")
     exit(code)
 end
+export fatal_error
 
 """
 Print a help message with usage instructions before exiting the program.
@@ -54,8 +44,8 @@ Julia program analysis and verification tool.
 Options:
     -h, --help          Show this help message and exit.
     -v, --version       Show analyzer version number.
-    -dump-ast           Print generated Julia AST.
-    -dump-smt           Print generated SMT-LIB text.
+    --dump-ast          Print generated Julia AST.
+    --dump-smt          Print generated SMT-LIB text.
 
 Examples:
     julia Veritas.jl input.jl           Analyze an input file.

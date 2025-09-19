@@ -34,4 +34,6 @@ function clean(ast, ctx)
     return ast
 end
 
+export clean
+
 end # module Preprocess

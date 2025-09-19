@@ -1,0 +1,10 @@
+name = "Veritas"
+uuid = "c1f9439d-c7d8-4853-9a94-acdd962e423e"
+authors = ["William Gibbs"]
+version = "0.1.0"
+
+[deps]
+Z3 = "06b161dc-0161-11ea-0f74-41f836f4024b"
+
+[compat]
+Z3 = "1.0.4"
