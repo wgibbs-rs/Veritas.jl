@@ -68,7 +68,7 @@ input.smt2
 
 This file will contain the smt2 encodings created by Veritas.
 """
-function put_output(ctx)
+function dump_smt(ctx)
     for file in ctx.input_file_names
         output_name = splitext(filename)[1] * ".smt2"
     end

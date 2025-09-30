@@ -31,13 +31,28 @@ const VariableType = (
     :type_undef # A special type used when a variable's type is unknown.
 )
 
-function create_model(ast, ctx)
-    encoding = smt2_header() # Generate the start of our theorem.
+function create_theorem(ast, ctx)
+    encoding = "" # Generate the start of our theorem.
     while true
         break
     end
     return encoding
 end
-export create_model
+export create_theorem
+
+# Returns a string result for a given tested function
+function check_contract_sat(title, text)
+    result = check_smt2(text)
+    if result 
+        # Function is satisfiable, so there is a value that can fail the condition.
+        # Function is [BAD]
+        return ""
+    else
+        # File is NOT satisfiable, meaning there is no possible input to fail the program.
+        # file is [OK]
+        return ""
+    end
+end
+export check_sat_result
 
 end # module Analyzer

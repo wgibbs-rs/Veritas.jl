@@ -37,16 +37,16 @@ Contains information on the current running program, such as
 the provided files, flags, and other information needed globally.
 """
 mutable struct ProgramContext
-    input_file_names::Vector{String}    # A list of input file names
-    input_file_asts::Vector{Expr}       # The AST associated with each input file
-    smt2_encodings::Vector{String}      # The SMT-LIB encodings created for each file
-    dump_smt::Bool                      # Should the SMT-LIB be output to a file after encoding
-    dump_ast::Bool                      # Should Veritas print the Julia code to the terminal
+    input_file_paths::Vector{String}        # A list of input file paths
+    input_file_asts::Vector{Expr}           # The AST associated with each input file
+    smt2_encodings::Vector{String}          # The SMT-LIB encodings created for each file
+    dump_smt::Bool                          # Should the SMT-LIB be output to a file after encoding
+    dump_ast::Bool                          # Should Veritas print the Julia code to the terminal
     ProgramContext() = new(
-        String[], 
-        Expr[], 
-        String[], 
-        false, 
+        String[],
+        Expr[],
+        String[],
+        false,
         false
     )
 end # struct ProgramContext
@@ -81,7 +81,7 @@ function parse_arguments(args)
             if startswith(arg, "-")
                 fatal_error("option \"$arg\" is unknown.\n  use \"src/veritas.jl --help\" for a list of options.")
             else
-                push!(ctx.input_file_names, arg)
+                push!(ctx.input_file_paths, arg)
             end
         end
     end
@@ -94,7 +94,7 @@ trees will later be used to generate SMT-LIB, the language used in
 static verifiers like Veritas.
 """
 function parse_files(ctx)
-    for file in ctx.input_file_names
+    for file in ctx.input_file_paths
         try
             contents = "begin\n" * read(file, String) * "\nend"
             ast = Meta.parse(contents)
@@ -130,23 +130,26 @@ function main(args)
     end
 
     # encode each file to SMT-LIB
-    for ast in ctx.input_file_asts
-        model = create_model(ast, ctx)
+    for i in eachindex(ctx.input_file_asts)
+        model = create_theorem(ctx.input_file_asts[i], ctx)
         push!(ctx.smt2_encodings, model)
         if ctx.dump_ast
-            Output.print_ast(ast)
+            Output.print_ast(ctx.input_file_asts[i])
         end
     end
 
     # If dumping the SMT-LIB encodings, we'll do that here, then exit.
     if ctx.dump_smt
         for i in 1:length(ctx.input_files)
-            # create files and dump
+            Output.dump_smt()
         end
         exit()
     end
 
-    # If not printing these encodings, we'll feed them to Z3 here... later.
+    # If not printing these encodings, we'll feed them to Z3 here
+    for i in eachindex(ctx.smt2_encodings)
+        
+    end
 
     # Print the resulting outputs from Z3, cleanup, etc.
 
