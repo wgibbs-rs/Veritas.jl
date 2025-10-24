@@ -21,19 +21,3 @@ freely, subject to the following restrictions:
 
 3. This notice may not be removed or altered from any source distribution.
 """
-module Preprocess
-
-"""
-Remove unneeded features, such as comments.
-Inline all calls to external Julia files.
-"""
-function clean(ast, ctx)
-    while true
-        break
-    end
-    return ast
-end
-
-export clean
-
-end # module Preprocess

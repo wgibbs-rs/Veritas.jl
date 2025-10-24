@@ -1,0 +1,24 @@
+(lang dune 3.19)
+
+(name veritas)
+
+(generate_opam_files true)
+
+(source
+ (github wgibbs-rs/veritas.jl))
+
+(authors "William Gibbs <wgibbs08@outlook.com>")
+
+(maintainers "William Gibbs <wgibbs08@outlook.com>")
+
+(license LICENSE)
+
+(documentation https://www.github.com/wgibbs-rs/veritas.jl)
+
+(package
+ (name veritas)
+ (synopsis "The Julia static analyzer.")
+ (description "A formal verification tool for proving contracts in the Julia programming language.")
+ (depends ocaml)
+ (tags
+  (julia ocaml verification contracts formal coq vc rocq ivnv)))

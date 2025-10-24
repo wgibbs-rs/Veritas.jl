@@ -1,0 +1,4 @@
+(executable
+ (public_name veritas)
+ (name main)
+ (libraries veritas))
