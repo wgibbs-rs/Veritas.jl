@@ -5,20 +5,22 @@
 (generate_opam_files true)
 
 (source
- (github wgibbs-rs/veritas.jl))
+ (github username/reponame))
 
-(authors "William Gibbs <wgibbs08@outlook.com>")
+(authors "Author Name <author@example.com>")
 
-(maintainers "William Gibbs <wgibbs08@outlook.com>")
+(maintainers "Maintainer Name <maintainer@example.com>")
 
 (license LICENSE)
 
-(documentation https://www.github.com/wgibbs-rs/veritas.jl)
+(documentation https://url/to/documentation)
 
 (package
  (name veritas)
- (synopsis "The Julia static analyzer.")
- (description "A formal verification tool for proving contracts in the Julia programming language.")
+ (synopsis "A short synopsis")
+ (description "A longer description")
  (depends ocaml)
  (tags
-  (julia ocaml verification contracts formal coq vc rocq ivnv)))
+  ("add topics" "to describe" your project)))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

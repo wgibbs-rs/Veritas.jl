@@ -1,4 +1,4 @@
-"""
+(*
 ZLib License
 
 Copyright (c) 2025 William Gibbs
@@ -20,30 +20,4 @@ freely, subject to the following restrictions:
     misrepresented as being the original software.
 
 3. This notice may not be removed or altered from any source distribution.
-"""
-
-# This file is unused, and its code has been copied into main.ml as a string.
-
-using JSON
-
-function expr_to_dict(expr::Expr)
-    return Dict(
-        "head" => string(expr.head),
-        "args" => [arg isa Expr ? expr_to_dict(arg) :
-                   arg isa Symbol ? string(arg) :
-                   arg for arg in expr.args]
-    )
-end
-
-results = Vector{Any}()
-
-for n in ARGS
-    try
-        push!(results, Dict("path" => n, "ast" => expr_to_dict(Meta.parse("begin\n" * read(n, String) * "\nend"))))
-    catch e
-        print("Error: " * string(e))
-        exit(0)
-    end
-end
-
-print(JSON.json(results))
+*)
