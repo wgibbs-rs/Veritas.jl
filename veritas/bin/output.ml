@@ -25,7 +25,7 @@ freely, subject to the following restrictions:
 (* Print an error message, and exit the program with a code. *)
 let fatal_error msg code =
     Printf.printf "veritas: \027[1;31merror:\027[0m %s\n" msg;
-    Printf.printf "veritas: \027[1;31merror:\027[0m analysis failed.\n";
+    Printf.printf "veritas: \027[1;31merror:\027[0m analysis failed\n";
     exit code
 
 (* Print an error message that does not terminate the program. *)
@@ -35,19 +35,18 @@ let error msg =
 (* Print a help message with usage instructions before exiting the program. *)
 let help () =
     print_endline
-        "Usage: ocaml Veritas.ml <options> <files>\n\
+        "Usage: veritas <options> <files>\n\
         \n\
-        Veritas.ml Static Analyzer 0.0.0\n\
-        OCaml program analysis and verification tool.\n\
+        Veritas.jl Static Analyzer 0.0.0\n\
+        Julia program analysis and verification tool.\n\
         \n\
         Options:\n\
                 -h, --help          Show this help message and exit.\n\
                 -v, --version       Show analyzer version number.\n\
-                --dump-ast          Print generated OCaml AST.\n\
-                --dump-smt          Print generated SMT-LIB text.\n\
+                -o FILE             Output ROCQ Gallina text to a file.\n\
         \n\
         Examples:\n\
-                ocaml Veritas.ml input.ml           Analyze an input file.\n"
+                veritas input.jl    Analyze an input file with Veritas annotations.\n"
 
 (* Print the current version of Veritas.jl *)
 let version () =

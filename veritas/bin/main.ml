@@ -32,38 +32,63 @@ Veritas relies on a 3 step process.
 
 (* Call Julia to parse our inputs. *)
 
-let julia_command : string = {|
+let _julia_command : string = {|
 using JSON
 function expr_to_dict(expr::Expr)
-    return Dict(
-        "head" => string(expr.head),
-        "args" => [arg isa Expr ? expr_to_dict(arg) :
-                   arg isa Symbol ? string(arg) :
-                   arg for arg in expr.args]
-    )
+  return Dict(
+    "head" => string(expr.head),
+    "args" => [arg isa Expr ? expr_to_dict(arg) :
+      arg isa Symbol ? string(arg) :
+      arg for arg in expr.args]
+)
 end
 results = Vector{Any}()
 for n in ARGS
-    try
-        push!(results, Dict("path" => n, "ast" => expr_to_dict(Meta.parse("begin\n" * read(n, String) * "\nend"))))
-    catch e
-        print("Error: " * string(e))
-    end
+  try
+    push!(results, Dict("path" => n, "ast" => expr_to_dict(Meta.parse("begin\n" * read(n, String) * "\nend"))))
+  catch e
+    print("Error: " * string(e))
+  end
 end
 print(JSON.json(results))
 |}
 
-let run_julia_parser (files : string list) : string =
-  let files_arg = String.concat " " (List.map (Printf.sprintf "%S") files) in
-  (* %S will correctly escape newlines and quotes *)
-  let cmd = Printf.sprintf "julia -e %S -- %s" julia_command files_arg in
-  let ic = Unix.open_process_in cmd in
-  let output = In_channel.input_all ic in
-  let _ = Unix.close_process_in ic in
-  output
+let verbose = ref false
 
-(* Example usage *)
+let output_rocq = ref false
+
+let output_filename = ref ""
+
+let input_files = ref []
+
+let parse_arguments () =
+  let n = Array.length Sys.argv in
+  (if n <= 1 then (
+    Output.help (); 
+    exit 0)
+  else
+    let i = ref 1 in
+    while !i < n do
+      (match Sys.argv.(!i) with
+      | "-h" | "-H" | "--help" -> Output.help (); exit 0
+      | "-V" | "-v" | "--verbose" -> verbose := true
+      | "-o" ->
+        if !i < n - 1 then (
+          output_rocq := true;
+          output_filename := Sys.argv.(!i + 1);
+          i := !i + 1
+        ) else
+          Output.fatal_error "-o option requires 1 argument" 1
+      | _ -> 
+        if Sys.file_exists Sys.argv.(!i) then
+          input_files := Sys.argv.(!i) :: !input_files
+        else
+          Output.error ("no such file or directory: \'" ^ Sys.argv.(!i) ^ "\'"));
+      i := !i + 1
+    done);
+  if List.length !input_files = 0 then
+    Output.fatal_error "no input files" 1
+
 let () =
-  let result = run_julia_parser ["file1.jl"; "file2.jl"] in
-  print_endline result
-
+  parse_arguments ();
+  exit 0
