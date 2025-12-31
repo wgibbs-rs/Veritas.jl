@@ -22,44 +22,13 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 *)
 
-(*
-Veritas relies on a 3 step process.
-
-1. Read, Parse, and Section Julia code into AST's for each verification condition.
-2. Encode each verification condition AST into Rocq Gallina for future analysis
-3. Pass this generated Gallina code to Rocq, and return the output to the user.
-*)
-
-(* Call Julia to parse our inputs. *)
-
-let _julia_command : string = {|
-using JSON
-function expr_to_dict(expr::Expr)
-  return Dict(
-    "head" => string(expr.head),
-    "args" => [arg isa Expr ? expr_to_dict(arg) :
-      arg isa Symbol ? string(arg) :
-      arg for arg in expr.args]
-)
-end
-results = Vector{Any}()
-for n in ARGS
-  try
-    push!(results, Dict("path" => n, "ast" => expr_to_dict(Meta.parse("begin\n" * read(n, String) * "\nend"))))
-  catch e
-    print("Error: " * string(e))
-  end
-end
-print(JSON.json(results))
-|}
-
 let verbose = ref false
 
 let output_rocq = ref false
-
 let output_filename = ref ""
 
 let input_files = ref []
+let julia_ast_json = ref ""
 
 let parse_arguments () =
   let n = Array.length Sys.argv in
@@ -91,4 +60,6 @@ let parse_arguments () =
 
 let () =
   parse_arguments ();
+  julia_ast_json := Parser.parse_julia_input_files !input_files;
+  (* print_endline !julia_ast_json; *)
   exit 0
